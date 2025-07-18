@@ -29,15 +29,24 @@ resource "google_apigee_instance" "apigee_instance" {
   org_id             = google_apigee_organization.apigee_org.id
   peering_cidr_range = "SLASH_22"
 
-    lifecycle {
+  lifecycle {
     prevent_destroy = true
   }
 }
 
-# Apigee environments
+# Apigee environments and groups
 resource "google_apigee_environment" "public_env" {
   name   = "public"
   org_id = google_apigee_organization.apigee_org.id
+}
+
+resource "google_apigee_envgroup" "public_group" {
+  name   = "public-group"
+  org_id = google_apigee_organization.apigee_org.id
+  hostnames = [
+    "api.example.com",
+    "api-public-dev.ramsayhealth.com.au",
+  ]
 }
 
 resource "google_apigee_environment" "private_env" {
@@ -45,18 +54,35 @@ resource "google_apigee_environment" "private_env" {
   org_id = google_apigee_organization.apigee_org.id
 }
 
-# Apigee environment groups
-resource "google_apigee_envgroup" "public_group" {
-  name      = "public-group"
-  org_id    = google_apigee_organization.apigee_org.id
-  hostnames = ["api.example.com"]
+resource "google_apigee_envgroup" "private_group" {
+  name   = "private-group"
+  org_id = google_apigee_organization.apigee_org.id
+  hostnames = [
+    "internal-api.example.com",
+    "private.api-dev.ramsayhealth.com.au",
+  ]
 }
 
-resource "google_apigee_envgroup" "private_group" {
-  name      = "private-group"
-  org_id    = google_apigee_organization.apigee_org.id
-  hostnames = ["internal-api.example.com"]
-}
+
+# Eval Orgs only support a maximum of two environments and environment groups
+
+# resource "google_apigee_environment" "partner_env" {
+#   name   = "partner"
+#   org_id = google_apigee_organization.apigee_org.id
+# }
+
+# resource "google_apigee_envgroup" "partner_group" {
+#   name      = "partner-group"
+#   org_id    = google_apigee_organization.apigee_org.id
+#   hostnames = [
+#     "internal-api.example.com",
+#     "partner.api-public-dev.ramsayhealth.com.au",
+#     "partner.api-dev.ramsayhealth.com.au",
+#     ]
+# }
+
+
+
 
 # Attach environments to environment groups
 resource "google_apigee_envgroup_attachment" "attach_public" {
@@ -68,5 +94,12 @@ resource "google_apigee_envgroup_attachment" "attach_private" {
   envgroup_id = google_apigee_envgroup.private_group.id
   environment = google_apigee_environment.private_env.name
 }
+
+# resource "google_apigee_envgroup_attachment" "attach_partner" {
+#   envgroup_id = google_apigee_envgroup.partner_group.id
+#   environment = google_apigee_environment.partner_env.name
+# }
+
+
 
 
