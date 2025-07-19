@@ -6,7 +6,7 @@ resource "google_dns_managed_zone" "aws_zone" {
 
   private_visibility_config {
     networks {
-      network_url = google_compute_network.custom_vpc.id
+      network_url = google_compute_network.nonprod_vpc.id
     }
   }
 
@@ -27,6 +27,13 @@ resource "google_dns_record_set" "a" {
 
 resource "google_service_networking_peered_dns_domain" "apigee" {
   name       = "apigee-dns-peering"
-  network    = google_compute_network.custom_vpc.name
+  network    = google_compute_network.nonprod_vpc.name
   dns_suffix = google_dns_managed_zone.aws_zone.dns_name
+
+  depends_on = [
+    google_apigee_instance.apigee_instance,
+    google_project_service.servicenetworking,
+    google_project_service.cloud_dns
+
+  ]
 }

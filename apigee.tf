@@ -6,7 +6,7 @@ resource "google_apigee_organization" "apigee_org" {
   description         = "Apigee Organization created via Terraform for DEV environment"
   analytics_region    = var.region
   disable_vpc_peering = false
-  authorized_network  = google_compute_network.custom_vpc.id
+  authorized_network  = google_compute_network.nonprod_vpc.id
   runtime_type        = "CLOUD"
   #   subscription_type = "SUBSCRIPTION"
   billing_type = "EVALUATION"
@@ -27,11 +27,12 @@ resource "google_apigee_instance" "apigee_instance" {
   name               = "au-sydney-instance"
   location           = var.region
   org_id             = google_apigee_organization.apigee_org.id
-  peering_cidr_range = "SLASH_22"
+  # ip_range = "10.21.0.0/28,10.21.0.16/28"
+  # peering_cidr_range = "SLASH_22"
 
-  lifecycle {
-    prevent_destroy = true
-  }
+  # lifecycle {
+  #   prevent_destroy = true
+  # }
 }
 
 # Apigee environments and groups

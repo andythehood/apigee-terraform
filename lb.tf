@@ -36,6 +36,10 @@ resource "google_compute_region_ssl_certificate" "self_signed" {
   name        = "apigee-internal-alb-cert"
   private_key = tls_private_key.private_key.private_key_pem
   certificate = tls_self_signed_cert.cert.cert_pem
+
+    depends_on = [
+    google_project_service.compute
+  ]
 }
 
 
@@ -47,8 +51,8 @@ resource "google_compute_region_network_endpoint_group" "psc_neg" {
   name                  = "apigee-psc-neg"
   network_endpoint_type = "PRIVATE_SERVICE_CONNECT"
   region                = var.region
-  network               = google_compute_network.custom_vpc.self_link
-  subnetwork            = google_compute_subnetwork.custom_subnet.self_link
+  network               = google_compute_network.nonprod_vpc.self_link
+  subnetwork            = google_compute_subnetwork.nonprod_vpc_apigee_subnet.self_link
   psc_target_service    = google_apigee_instance.apigee_instance.service_attachment
 }
 
@@ -104,7 +108,7 @@ resource "google_compute_region_target_https_proxy" "proxy" {
 # ----------------------------------------------------
 resource "google_compute_address" "ip_address" {
   name         = "apigee-internal-alb-ip"
-  subnetwork   = google_compute_subnetwork.custom_subnet.self_link
+  subnetwork   = google_compute_subnetwork.nonprod_vpc_apigee_subnet.self_link
   address_type = "INTERNAL"
   region       = var.region
 }
@@ -118,11 +122,11 @@ resource "google_compute_forwarding_rule" "forwarding_rule" {
   load_balancing_scheme = "INTERNAL_MANAGED"
   port_range            = "443"
   target                = google_compute_region_target_https_proxy.proxy.id
-  network               = google_compute_network.custom_vpc.self_link
-  subnetwork            = google_compute_subnetwork.custom_subnet.self_link
+  network               = google_compute_network.nonprod_vpc.self_link
+  subnetwork            = google_compute_subnetwork.nonprod_vpc_apigee_subnet.self_link
   ip_address            = google_compute_address.ip_address.address
   ip_protocol           = "TCP"
   region                = var.region
 
-  depends_on = [google_compute_subnetwork.proxy_subnet]
+  depends_on = [google_compute_subnetwork.nonprod_vpc_proxy_only_subnet]
 }

@@ -5,3 +5,8 @@ output "apigee_org" {
 output "apigee_service_attachment" {
   value = google_apigee_instance.apigee_instance.service_attachment
 }
+
+output "apigee_instance_ip_range" {
+  value = google_apigee_instance.apigee_instance.ip_range
+}
+
