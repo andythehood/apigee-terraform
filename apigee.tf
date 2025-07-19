@@ -8,9 +8,13 @@ resource "google_apigee_organization" "apigee_org" {
   disable_vpc_peering = false
   authorized_network  = google_compute_network.nonprod_vpc.id
   runtime_type        = "CLOUD"
-  #   subscription_type = "SUBSCRIPTION"
+
+  # For testing purposes, we can use EVALUATION billing type
   billing_type = "EVALUATION"
   retention    = "MINIMUM"
+
+  # billing_type = "SUBSCRIPTION"
+  # retention = "DELETION_RETENTION_UNSPECIFIED"
 
   lifecycle {
     prevent_destroy = true
@@ -24,15 +28,13 @@ resource "google_apigee_organization" "apigee_org" {
 
 # Apigee instance
 resource "google_apigee_instance" "apigee_instance" {
-  name               = "au-sydney-instance"
-  location           = var.region
-  org_id             = google_apigee_organization.apigee_org.id
-  # ip_range = "10.21.0.0/28,10.21.0.16/28"
-  # peering_cidr_range = "SLASH_22"
+  name     = "au-sydney-instance"
+  location = var.region
+  org_id   = google_apigee_organization.apigee_org.id
 
-  # lifecycle {
-  #   prevent_destroy = true
-  # }
+  # Uncomment the following line to specify a the CIDR ranges, otherwise Apigee will auto allocate from the Service Networking peering range
+  # ip_range = "10.21.0.0/28,10.21.0.16/28"
+
 }
 
 # Apigee environments and groups
