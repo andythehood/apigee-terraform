@@ -60,13 +60,21 @@ resource "google_compute_subnetwork" "nonprod_vpc_proxy_only_subnet" {
 }
 
 
+
+
 # Reserve IP range for service networking
+
+locals {
+  service_networking_peering_cidr_address = cidrhost(var.service_networking_peering_cidr, 0)
+  service_networking_peering_cidr_length  = tonumber(split("/", var.service_networking_peering_cidr)[1])
+}
+
 resource "google_compute_global_address" "apigee_service_networking_peering_range" {
   name          = "apigee-service-networking-peering-range"
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
-  address       = "10.21.0.0"
-  prefix_length = 20
+  address       = local.service_networking_peering_cidr_address
+  prefix_length = local.service_networking_peering_cidr_length
   network       = google_compute_network.nonprod_vpc.id
   project       = data.google_project.hub.project_id
 

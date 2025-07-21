@@ -1,4 +1,35 @@
 
+locals {
+  # FOR EVALUATION, allocate a /28 for management and runtime.
+  # For PAID ORGS, allocate a /22 for runtime and a /28 for management.
+  # Assumes that service_networking_peering_cidr is a /20 CIDR block.
+
+  #EVAL
+  # /28 for runtime
+  apigee_runtime_cidr_range = cidrsubnet(var.service_networking_peering_cidr, 8, 0) # 10.21.0.0/28
+  apigee_mgmt_cidr_range    = cidrsubnet(var.service_networking_peering_cidr, 8, 1) # 10.21.0.16/28
+
+
+  #PROD
+
+  # /22 for runtime
+  # apigee_runtime_cidr_range = cidrsubnet(var.service_networking_peering_cidr, 2, 0) # 10.21.0.0/22
+
+  # base for /28s (starting from next /22)
+  # base_for_mgmt = cidrsubnet(var.service_networking_peering_cidr, 2, 1) # 10.21.4.0/22
+  # apigee_mgmt_cidr_range = cidrsubnet(local.base_for_mgmt, 6, 0)      # 10.21.4.0/28
+}
+
+output "apigee_runtime_cidr_range" {
+  value = local.apigee_runtime_cidr_range
+}
+
+
+output "apigee_mgmt_cidr_range" {
+  value = local.apigee_mgmt_cidr_range
+}
+
+
 # Apigee organization
 resource "google_apigee_organization" "apigee_org" {
   project_id          = data.google_project.apigee.project_id
@@ -34,6 +65,8 @@ resource "google_apigee_instance" "apigee_instance" {
 
   # Uncomment the following line to specify a the CIDR ranges, otherwise Apigee will auto allocate from the Service Networking peering range
   # ip_range = "10.21.0.0/28,10.21.0.16/28"
+  ip_range = "${local.apigee_runtime_cidr_range},${local.apigee_mgmt_cidr_range}"
+
 
 }
 
