@@ -19,6 +19,7 @@ variable "region" {
 }
 
 variable "service_networking_peering_cidr" {
+  type    = string
   default = "10.21.0.0/20"
 }
 

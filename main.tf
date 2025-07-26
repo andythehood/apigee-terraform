@@ -1,6 +1,22 @@
+terraform {
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = ">= 6.0.0"
+    }
+    tls = {
+      source  = "hashicorp/tls"
+      version = ">= 4.0.0"
+    }
+  }
+  required_version = ">= 1.3.0"
+}
+
+
 provider "google" {
   project = var.apigee_project_id
   region  = var.region
+
 }
 
 # Data source: Reference existing project
@@ -18,8 +34,8 @@ data "google_project" "hub" {
 
 # Enable Compute Engine API
 resource "google_project_service" "compute" {
-  project = data.google_project.apigee.project_id
-  service = "compute.googleapis.com"
+  project            = data.google_project.apigee.project_id
+  service            = "compute.googleapis.com"
   disable_on_destroy = false
 }
 

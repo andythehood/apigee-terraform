@@ -6,6 +6,11 @@ resource "google_compute_network" "nonprod_vpc" {
   depends_on              = [google_project_service.compute, google_project_service.apigee]
 }
 
+# data "google_compute_network" "nonprod_vpc" {
+#   name                    = "nonprod-vpc"
+#   project                 = data.google_project.hub.project_id
+# }
+
 # Subnet resource
 resource "google_compute_subnetwork" "nonprod_vpc_apigee_subnet" {
   name          = "nonprod-vpc-apigee-subnet"
@@ -13,6 +18,14 @@ resource "google_compute_subnetwork" "nonprod_vpc_apigee_subnet" {
   region        = var.region
   network       = google_compute_network.nonprod_vpc.id
   project       = data.google_project.hub.project_id
+}
+
+# Subnet resource
+data "google_compute_subnetwork" "nonprod_vpc_apigee_subnet" {
+  name = "nonprod-vpc-apigee-subnet"
+  # region        = var.region
+  # network       = google_compute_network.nonprod_vpc.id
+  project = data.google_project.hub.project_id
 }
 
 resource "google_compute_subnetwork" "nonprod_vpc_host_subnet" {
@@ -29,9 +42,9 @@ resource "google_compute_route" "override_route_0" {
   network     = google_compute_network.nonprod_vpc.name
   next_hop_ip = "10.10.1.1"
 
-  priority    = 100
+  priority = 100
 
-  depends_on = [ google_compute_subnetwork.nonprod_vpc_host_subnet ]
+  depends_on = [google_compute_subnetwork.nonprod_vpc_host_subnet]
 }
 
 resource "google_compute_route" "override_route_1" {
@@ -41,7 +54,7 @@ resource "google_compute_route" "override_route_1" {
   next_hop_ip = "10.10.1.1"
   priority    = 100
 
-  depends_on = [ google_compute_subnetwork.nonprod_vpc_host_subnet ]
+  depends_on = [google_compute_subnetwork.nonprod_vpc_host_subnet]
 
 }
 
@@ -86,7 +99,7 @@ resource "google_service_networking_connection" "apigee_private_connection" {
   network                 = google_compute_network.nonprod_vpc.id
   service                 = "servicenetworking.googleapis.com"
   reserved_peering_ranges = [google_compute_global_address.apigee_service_networking_peering_range.name]
-  
+
 
   depends_on = [
     google_project_service.servicenetworking

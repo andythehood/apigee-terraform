@@ -37,7 +37,7 @@ resource "google_compute_region_ssl_certificate" "self_signed" {
   private_key = tls_private_key.private_key.private_key_pem
   certificate = tls_self_signed_cert.cert.cert_pem
 
-    depends_on = [
+  depends_on = [
     google_project_service.compute
   ]
 }
@@ -52,7 +52,7 @@ resource "google_compute_region_network_endpoint_group" "psc_neg" {
   network_endpoint_type = "PRIVATE_SERVICE_CONNECT"
   region                = var.region
   network               = google_compute_network.nonprod_vpc.self_link
-  subnetwork            = google_compute_subnetwork.nonprod_vpc_apigee_subnet.self_link
+  subnetwork            = data.google_compute_subnetwork.nonprod_vpc_apigee_subnet.self_link
   psc_target_service    = google_apigee_instance.apigee_instance.service_attachment
 }
 
