@@ -121,15 +121,27 @@ resource "google_compute_region_url_map" "url_map" {
   default_service = google_compute_region_backend_service.https_backend.id
 }
 
-resource "google_compute_region_target_https_proxy" "proxy" {
+resource "google_compute_region_target_https_proxy" "dev_proxy" {
+  count   = var.environment == "dev" ? 1 : 0
   name    = "apigee-internal-alb-proxy"
   region  = var.region
   url_map = google_compute_region_url_map.url_map.self_link
-  # ssl_certificates = [google_compute_region_ssl_certificate.self_signed.id]
+
+  ssl_certificates = [google_compute_region_ssl_certificate.self_signed.id]
   # certificate_manager_certificates = [google_certificate_manager_certificate.self_managed_cert.id]
-  certificate_manager_certificates = [google_certificate_manager_certificate.host_self_managed_cert.id]
+  # certificate_manager_certificates = [google_certificate_manager_certificate.host_self_managed_cert.id]
 }
 
+# resource "google_compute_region_target_https_proxy" "proxy" {
+#   count                = var.environment == "dev" ? 1 : 0
+#   name    = "apigee-internal-alb-proxy"
+#   region  = var.region
+#   url_map = google_compute_region_url_map.url_map.self_link
+
+#   # ssl_certificates = [google_compute_region_ssl_certificate.self_signed.id]
+#   # certificate_manager_certificates = [google_certificate_manager_certificate.self_managed_cert.id]
+#   certificate_manager_certificates = [google_certificate_manager_certificate.host_self_managed_cert.id]
+# }
 
 # ----------------------------------------------------
 # Static Internal IP address
@@ -149,7 +161,7 @@ resource "google_compute_forwarding_rule" "forwarding_rule" {
   name                  = "apigee-internal-alb-forwarding-rule"
   load_balancing_scheme = "INTERNAL_MANAGED"
   port_range            = "443"
-  target                = google_compute_region_target_https_proxy.proxy.id
+  target                = google_compute_region_target_https_proxy.dev_proxy[0].id
   network               = google_compute_network.nonprod_vpc.self_link
   subnetwork            = google_compute_subnetwork.nonprod_vpc_apigee_subnet.self_link
   ip_address            = google_compute_address.ip_address.address

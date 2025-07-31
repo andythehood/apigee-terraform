@@ -18,6 +18,9 @@ variable "service_networking_peering_cidr" {
 }
 
 
-
+variable "environment" {
+  description = "SDLC environment (e.g., dev, sit, ppe prod)"
+  type        = string
+}
 
 
