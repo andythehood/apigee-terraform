@@ -14,7 +14,7 @@ variable "region" {
 }
 
 variable "service_networking_peering_cidr" {
-  type    = string
+  type = string
 }
 
 

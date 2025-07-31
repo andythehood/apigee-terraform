@@ -43,6 +43,32 @@ resource "google_compute_region_ssl_certificate" "self_signed" {
 }
 
 
+resource "google_certificate_manager_certificate" "host_self_managed_cert" {
+  project  = "aviato-andy-sandbox-host"
+  name     = "apigee-internal-alb-cert"
+  location = var.region
+  self_managed {
+    pem_certificate = tls_self_signed_cert.cert.cert_pem
+    pem_private_key = tls_private_key.private_key.private_key_pem
+  }
+  #   self_managed {
+  #   pem_certificate = file("test-fixtures/cert.pem")
+  #   pem_private_key = file("test-fixtures/private-key.pem")                                                                                                                
+  # }
+}
+
+resource "google_certificate_manager_certificate" "self_managed_cert" {
+  name     = "apigee-internal-alb-cert"
+  location = var.region
+  self_managed {
+    pem_certificate = tls_self_signed_cert.cert.cert_pem
+    pem_private_key = tls_private_key.private_key.private_key_pem
+  }
+  #   self_managed {
+  #   pem_certificate = file("test-fixtures/cert.pem")
+  #   pem_private_key = file("test-fixtures/private-key.pem")                                                                                                                
+  # }
+}
 
 # ----------------------------------------------------
 # PSC NEG backend
@@ -96,10 +122,12 @@ resource "google_compute_region_url_map" "url_map" {
 }
 
 resource "google_compute_region_target_https_proxy" "proxy" {
-  name             = "apigee-internal-alb-proxy"
-  region           = var.region
-  url_map          = google_compute_region_url_map.url_map.self_link
-  ssl_certificates = [google_compute_region_ssl_certificate.self_signed.id]
+  name    = "apigee-internal-alb-proxy"
+  region  = var.region
+  url_map = google_compute_region_url_map.url_map.self_link
+  # ssl_certificates = [google_compute_region_ssl_certificate.self_signed.id]
+  # certificate_manager_certificates = [google_certificate_manager_certificate.self_managed_cert.id]
+  certificate_manager_certificates = [google_certificate_manager_certificate.host_self_managed_cert.id]
 }
 
 
