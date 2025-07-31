@@ -23,6 +23,6 @@ output "cert1" {
   value = google_certificate_manager_certificate.self_managed_cert.id
 }
 
-output "cert2" {
-  value = google_certificate_manager_certificate.host_self_managed_cert.id
-}
+# output "cert2" {
+#   value = google_certificate_manager_certificate.host_self_managed_cert.id
+# }

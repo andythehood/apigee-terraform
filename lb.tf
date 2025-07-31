@@ -43,19 +43,23 @@ resource "google_compute_region_ssl_certificate" "self_signed" {
 }
 
 
-resource "google_certificate_manager_certificate" "host_self_managed_cert" {
-  project  = "aviato-andy-sandbox-host"
-  name     = "apigee-internal-alb-cert"
-  location = var.region
-  self_managed {
-    pem_certificate = tls_self_signed_cert.cert.cert_pem
-    pem_private_key = tls_private_key.private_key.private_key_pem
-  }
-  #   self_managed {
-  #   pem_certificate = file("test-fixtures/cert.pem")
-  #   pem_private_key = file("test-fixtures/private-key.pem")                                                                                                                
-  # }
-}
+# resource "google_certificate_manager_certificate" "host_self_managed_cert" {
+#   project  = "aviato-andy-sandbox-host"
+#   name     = "apigee-internal-alb-cert"
+#   location = var.region
+#   self_managed {
+#     pem_certificate = tls_self_signed_cert.cert.cert_pem
+#     pem_private_key = tls_private_key.private_key.private_key_pem
+#   }
+
+#   depends_on = [
+#     google_project_service.certificatemanager
+#   ]
+#   #   self_managed {
+#   #   pem_certificate = file("test-fixtures/cert.pem")
+#   #   pem_private_key = file("test-fixtures/private-key.pem")                                                                                                                
+#   # }
+# }
 
 resource "google_certificate_manager_certificate" "self_managed_cert" {
   name     = "apigee-internal-alb-cert"
@@ -64,6 +68,9 @@ resource "google_certificate_manager_certificate" "self_managed_cert" {
     pem_certificate = tls_self_signed_cert.cert.cert_pem
     pem_private_key = tls_private_key.private_key.private_key_pem
   }
+  depends_on = [
+    google_project_service.certificatemanager
+  ]
   #   self_managed {
   #   pem_certificate = file("test-fixtures/cert.pem")
   #   pem_private_key = file("test-fixtures/private-key.pem")                                                                                                                
@@ -78,7 +85,7 @@ resource "google_compute_region_network_endpoint_group" "psc_neg" {
   network_endpoint_type = "PRIVATE_SERVICE_CONNECT"
   region                = var.region
   network               = google_compute_network.nonprod_vpc.self_link
-  subnetwork            = data.google_compute_subnetwork.nonprod_vpc_apigee_subnet.self_link
+  subnetwork            = google_compute_subnetwork.nonprod_vpc_apigee_subnet.self_link
   psc_target_service    = google_apigee_instance.apigee_instance.service_attachment
 }
 
@@ -121,14 +128,14 @@ resource "google_compute_region_url_map" "url_map" {
   default_service = google_compute_region_backend_service.https_backend.id
 }
 
-resource "google_compute_region_target_https_proxy" "dev_proxy" {
-  count   = var.environment == "dev" ? 1 : 0
+resource "google_compute_region_target_https_proxy" "proxy" {
+  # count   = var.environment == "dev" ? 1 : 0
   name    = "apigee-internal-alb-proxy"
   region  = var.region
   url_map = google_compute_region_url_map.url_map.self_link
 
-  ssl_certificates = [google_compute_region_ssl_certificate.self_signed.id]
-  # certificate_manager_certificates = [google_certificate_manager_certificate.self_managed_cert.id]
+  # ssl_certificates = [google_compute_region_ssl_certificate.self_signed.id]
+  certificate_manager_certificates = [google_certificate_manager_certificate.self_managed_cert.id]
   # certificate_manager_certificates = [google_certificate_manager_certificate.host_self_managed_cert.id]
 }
 
@@ -161,7 +168,7 @@ resource "google_compute_forwarding_rule" "forwarding_rule" {
   name                  = "apigee-internal-alb-forwarding-rule"
   load_balancing_scheme = "INTERNAL_MANAGED"
   port_range            = "443"
-  target                = google_compute_region_target_https_proxy.dev_proxy[0].id
+  target                = google_compute_region_target_https_proxy.proxy.id
   network               = google_compute_network.nonprod_vpc.self_link
   subnetwork            = google_compute_subnetwork.nonprod_vpc_apigee_subnet.self_link
   ip_address            = google_compute_address.ip_address.address

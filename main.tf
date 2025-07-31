@@ -67,3 +67,9 @@ resource "google_project_service" "cloud_dns" {
   disable_on_destroy = false
 }
 
+# Enable Certificate Manager API
+resource "google_project_service" "certificatemanager" {
+  project            = data.google_project.apigee.project_id
+  service            = "certificatemanager.googleapis.com"
+  disable_on_destroy = false
+}

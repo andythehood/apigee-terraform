@@ -20,13 +20,13 @@ resource "google_compute_subnetwork" "nonprod_vpc_apigee_subnet" {
   project       = data.google_project.hub.project_id
 }
 
-# Subnet resource
-data "google_compute_subnetwork" "nonprod_vpc_apigee_subnet" {
-  name = "nonprod-vpc-apigee-subnet"
-  # region        = var.region
-  # network       = google_compute_network.nonprod_vpc.id
-  project = data.google_project.hub.project_id
-}
+# # Subnet resource
+# data "google_compute_subnetwork" "nonprod_vpc_apigee_subnet" {
+#   name = "nonprod-vpc-apigee-subnet"
+#   # region        = var.region
+#   # network       = google_compute_network.nonprod_vpc.id
+#   project = data.google_project.hub.project_id
+# }
 
 resource "google_compute_subnetwork" "nonprod_vpc_host_subnet" {
   name          = "nonprod-vpc-host-subnet"
