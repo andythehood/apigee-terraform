@@ -1,5 +1,5 @@
-apigee_project_id               = "aviato-andy-apigee-tf-xd"
-hub_project_id                  = "aviato-andy-apigee-tf-xd"
+apigee_project_id               = "aviato-andy-apigee-tf-z1"
+hub_project_id                  = "aviato-andy-apigee-tf-z1"
 region                          = "australia-southeast1"
 service_networking_peering_cidr = "10.21.0.0/20"
 environment                     = "dev"

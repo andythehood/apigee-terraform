@@ -32,15 +32,15 @@ resource "tls_self_signed_cert" "cert" {
   ]
 }
 
-resource "google_compute_region_ssl_certificate" "self_signed" {
-  name        = "apigee-internal-alb-cert"
-  private_key = tls_private_key.private_key.private_key_pem
-  certificate = tls_self_signed_cert.cert.cert_pem
+# resource "google_compute_region_ssl_certificate" "self_signed" {
+#   name        = "apigee-internal-alb-cert"
+#   private_key = tls_private_key.private_key.private_key_pem
+#   certificate = tls_self_signed_cert.cert.cert_pem
 
-  depends_on = [
-    google_project_service.compute
-  ]
-}
+#   depends_on = [
+#     google_project_service.compute
+#   ]
+# }
 
 
 # resource "google_certificate_manager_certificate" "host_self_managed_cert" {
@@ -135,7 +135,8 @@ resource "google_compute_region_target_https_proxy" "proxy" {
   url_map = google_compute_region_url_map.url_map.self_link
 
   # ssl_certificates = [google_compute_region_ssl_certificate.self_signed.id]
-  certificate_manager_certificates = [google_certificate_manager_certificate.self_managed_cert.id]
+  certificate_manager_certificates = ["projects/${var.apigee_project_id}/locations/${var.region}/certificates/apigee-internal-alb-cert"]
+  # certificate_manager_certificates = [google_certificate_manager_certificate.self_managed_cert.id]
   # certificate_manager_certificates = [google_certificate_manager_certificate.host_self_managed_cert.id]
 }
 

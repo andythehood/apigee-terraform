@@ -138,15 +138,18 @@ resource "google_apigee_envgroup_attachment" "attach_private" {
 
 
 # Attach environments to instance
-resource "google_apigee_instance_attachment" "attach_public" {
-  instance_id = google_apigee_instance.apigee_instance.id
-  environment = google_apigee_environment.public_env.name
-}
+# This doesn't work for Evaluation
 
-resource "google_apigee_instance_attachment" "attach_private" {
-  instance_id = google_apigee_instance.apigee_instance.id
-  environment = google_apigee_environment.private_env.name
 
-  depends_on = [ google_apigee_instance_attachment.attach_public ]
-}
+# resource "google_apigee_instance_attachment" "attach_public" {
+#   instance_id = google_apigee_instance.apigee_instance.id
+#   environment = google_apigee_environment.public_env.name
+# }
+
+# resource "google_apigee_instance_attachment" "attach_private" {
+#   instance_id = google_apigee_instance.apigee_instance.id
+#   environment = google_apigee_environment.private_env.name
+
+#   depends_on = [ google_apigee_instance_attachment.attach_public ]
+# }
 
