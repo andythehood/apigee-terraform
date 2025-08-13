@@ -32,6 +32,67 @@ resource "tls_self_signed_cert" "cert" {
   ]
 }
 
+
+resource "google_secret_manager_secret" "secret_tls_cert_pem" {
+  secret_id = "${var.environment}-eiip-apigw-tls-cert-pem"
+
+  replication {
+     user_managed {
+       replicas {
+          location = var.region
+        }
+    }
+  }
+
+      depends_on = [
+    google_project_service.secretmanager
+  ]
+}
+
+resource "google_secret_manager_secret_version" "secret_tls_cert_pem" {
+  secret      = google_secret_manager_secret.secret_tls_cert_pem.id
+  secret_data = tls_self_signed_cert.cert.cert_pem
+  enabled     = true
+
+  lifecycle {
+    ignore_changes = [
+      secret_data,
+      enabled
+    ]
+  }
+}
+
+resource "google_secret_manager_secret" "secret_tls_key_pem" {
+  secret_id = "${var.environment}-eiip-apigw-tls-key-pem"
+
+  replication {
+     user_managed {
+       replicas {
+          location = var.region
+        }
+    }
+  }
+
+    depends_on = [
+    google_project_service.secretmanager
+  ]
+}
+
+resource "google_secret_manager_secret_version" "secret_tls_key_pem" {
+  secret      = google_secret_manager_secret.secret_tls_key_pem.id
+  secret_data = tls_private_key.private_key.private_key_pem
+  enabled     = true
+
+  lifecycle {
+    ignore_changes = [
+      secret_data,
+      enabled
+    ]
+  }
+}
+
+
+
 # resource "google_compute_region_ssl_certificate" "self_signed" {
 #   name        = "apigee-internal-alb-cert"
 #   private_key = tls_private_key.private_key.private_key_pem
@@ -65,8 +126,8 @@ resource "google_certificate_manager_certificate" "self_managed_cert" {
   name     = "apigee-internal-alb-cert"
   location = var.region
   self_managed {
-    pem_certificate = tls_self_signed_cert.cert.cert_pem
-    pem_private_key = tls_private_key.private_key.private_key_pem
+    pem_certificate = google_secret_manager_secret_version.secret_tls_cert_pem.secret_data
+    pem_private_key = google_secret_manager_secret_version.secret_tls_key_pem.secret_data
   }
   depends_on = [
     google_project_service.certificatemanager

@@ -73,3 +73,10 @@ resource "google_project_service" "certificatemanager" {
   service            = "certificatemanager.googleapis.com"
   disable_on_destroy = false
 }
+
+# Enable Secret Manager API
+resource "google_project_service" "secretmanager" {
+  project            = data.google_project.apigee.project_id
+  service            = "secretmanager.googleapis.com"
+  disable_on_destroy = false
+}
